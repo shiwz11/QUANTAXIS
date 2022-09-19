@@ -426,7 +426,7 @@ def QA_ts_update_namechange():
 
 def QA_ts_update_industry(
     level: Union[str, List, Tuple] = ["L1", "L2", "L3"],
-    src: Union[str, List, Tuple] = "SW",
+    src: Union[str, List, Tuple] = "SW2021",
 ):
     """
     保存个股行业信息
@@ -456,6 +456,8 @@ def QA_ts_update_industry(
     for idx, item in df_industry.iterrows():
         if idx % 100 == 0:
             print(f"currently saving {idx}th record")
+            print("max limit 400 times per minute")
+            time.sleep(10)
         try:
             df_tmp = pro.index_member(index_code=item["index_code"])
             df_tmp["industry_name"] = item["industry_name"]
@@ -489,10 +491,10 @@ def QA_ts_update_industry(
     )
     for item in QA_util_to_json_from_pandas(df_results):
         item["in_date_stamp"] = QA_util_date_stamp(item["in_date"])
-        if not item["out_date"]:
+        if not item["out_date"] or pd.isna(item["out_date"]) or item["out_date"] is None:
             item["out_date_stamp"] = 9999999999
         else:
-            item["out_date_stamp"] = QA_util_date_stamp(item["out_date_stamp"])
+            item["out_date_stamp"] = QA_util_date_stamp(item["out_date"])
         coll.update_one(
             {
                 "code": item["code"],
